@@ -17,6 +17,35 @@
             </div>
             <button type="submit" class="btn btn-primary">Upload and Remove Background</button>
         </form>
+        <div id="result" class="mt-4"></div>
     </div>
+
+    <script>
+        const form = document.querySelector('form');
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+
+                // Resmi görüntüle
+                const img = `<img src="${url}" alt="Processed Image" class="img-fluid mt-3">`;
+
+                // İndirme butonunu oluştur
+                const downloadButton = `<a href="${url}" download="output.png" class="btn btn-success mt-2">Download Image</a>`;
+
+                document.getElementById('result').innerHTML = img + downloadButton;
+            } else {
+                const text = await response.text();
+                document.getElementById('result').innerHTML = `<p class="text-danger">${text}</p>`;
+            }
+        };
+    </script>
 </body>
 </html>

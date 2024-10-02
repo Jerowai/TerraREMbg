@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify, render_template
+from humanfriendly.terminal import output
 from rembg import remove
 from PIL import Image
 import io
+from flask import send_file
 
 app = Flask(__name__)
 
@@ -14,25 +16,25 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+        return 'No file part'
 
     file = request.files['file']
     if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+        return 'No selected file'
 
-    # Fotoğrafı aç ve arka planı kaldır
-    input_image = Image.open(file.stream)
+    # Resmi oku
+    input_image = file.read()
+
+    # Arka planı kaldır
     output_image = remove(input_image)
 
-    # İşlenen fotoğrafı geri döndür
-    img_byte_arr = io.BytesIO()
-    output_image.save(img_byte_arr, format='PNG')
-    img_byte_arr.seek(0)
+    # İşlenmiş resmi kaydet
+    output_path = 'output.png'
+    with open(output_path, 'wb') as f:
+        f.write(output_image)
 
-    return (img_byte_arr, 200, {
-        'Content-Type': 'image/png',
-        'Content-Disposition': 'inline; filename=result.png'
-    })
+    # İslenmiş resmi gönder
+    return send_file(output_path, as_attachment=True)
 
 
 if __name__ == '__main__':
