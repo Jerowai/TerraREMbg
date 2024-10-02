@@ -3,43 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Background Removal</title>
+    <title>Background Removal Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Fotoğraftan Arka Planı Kaldırma</h2>
-    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required>
-        <button type="submit">Upload and Remove Background</button>
-    </form>
-    <div id="result">
-        <!-- İşlenmiş fotoğraf buraya yerleştirilecek -->
+    <div class="container mt-5">
+        <h1 class="text-center">Remove Background from Image</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file" class="form-label">Choose an Image File:</label>
+                <input class="form-control" type="file" id="file" name="file">
+            </div>
+            <button type="submit" class="btn btn-primary">Upload and Remove Background</button>
+        </form>
     </div>
-
-    <script>
-        const form = document.getElementById('upload-form');
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (!response.ok) {
-                    throw new Error('Error in processing the image');
-                }
-
-                const blob = await response.blob();
-                const imgURL = URL.createObjectURL(blob);
-
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = `<h3>Result:</h3><img src="${imgURL}" alt="Processed Image">`;
-
-            } catch (error) {
-                alert('An error occurred: ' + error.message);
-            }
-        };
-    </script>
 </body>
 </html>
