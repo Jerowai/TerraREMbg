@@ -4,8 +4,14 @@ from rembg import remove
 from PIL import Image
 import io
 from flask import send_file
+import os
+from flask import flask
 
 app = Flask(__name__)
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Heroku'dan gelen PORT'u kullan
+    app.run(host='0.0.0.0', port=port)  # Heroku, dış bağlantıları dinlemek için host'u '0.0.0.0' olarak ayarlayın
 
 
 @app.route('/')
