@@ -1,23 +1,13 @@
-from flask import Flask, request, jsonify, render_template
-from humanfriendly.terminal import output
+from flask import Flask, request, render_template, send_file
 from rembg import remove
 from PIL import Image
 import io
-from flask import send_file
-import os
-from flask import flask
 
 app = Flask(__name__)
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Heroku'dan gelen PORT'u kullan
-    app.run(host='0.0.0.0', port=port)  # Heroku, dış bağlantıları dinlemek için host'u '0.0.0.0' olarak ayarlayın
-
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -28,20 +18,24 @@ def upload_file():
     if file.filename == '':
         return 'No selected file'
 
-    # Resmi oku
-    input_image = file.read()
+    try:
+        # Resmi oku
+        input_image = Image.open(file)
 
-    # Arka planı kaldır
-    output_image = remove(input_image)
+        # Arka planı kaldır
+        output_image = remove(input_image)
 
-    # İşlenmiş resmi kaydet
-    output_path = 'output.png'
-    with open(output_path, 'wb') as f:
-        f.write(output_image)
+        # Çıktıyı hafızada tut
+        output_buffer = io.BytesIO()
+        output_image.save(output_buffer, format='PNG')
+        output_buffer.seek(0)
 
-    # İslenmiş resmi gönder
-    return send_file(output_path, as_attachment=True)
+        # İşlenmiş resmi geri gönder
+        return send_file(output_buffer, mimetype='image/png', as_attachment=False)
 
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
 
 if __name__ == '__main__':
     app.run(debug=True)
+
